@@ -1,6 +1,53 @@
 const fs = require("fs");
+const fsPromise = require("fs").promises;
+const path = require("path");
 
 const myArgs = process.argv.slice(2);
+
+const folders = ["models", "views", "routes", "logs", "json"];
+
+function createFolders() {
+  if (DEBUG) console.log("init.createFolders()");
+  let mkcount = 0;
+  folders.forEach((folder) => {
+    if (DEBUG) console.log(folder);
+    try {
+      if (!fs.existsSync(path.join(__dirname, folder))) {
+        fsPromise.mkdir(path.join(__dirname, folder));
+        mkcount++;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  });
+  if (mkcount === 0) {
+    console.log("All folders already exist.");
+  } else if (mkcount <= folders.length) {
+    console.log(mkcount + " of " + folders.length + " folders were created.");
+  } else {
+    console.log("All folders successfully created.");
+  }
+}
+
+function createFiles() {
+  if (DEBUG) console.log("init.createFiles()");
+  try {
+    let configdata = JSON.stringify(configjson, null, 2);
+    if (!fs.existsSync(path.join(__dirname, "./json/config.json"))) {
+      fs.writeFile("./json/config.json", configdata, (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("Data written to config file.");
+        }
+      });
+    } else {
+      console.log("config file already exists.");
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 function initializeApplication() {
   if (DEBUG) console.log("initilizeApplication()");
@@ -9,11 +56,13 @@ function initializeApplication() {
     case "--all":
       if (DEBUG) console.log(" --all createFolder() and createFiles()");
       break;
-    case "--mk":
-      if (DEBUG) console.log(" --mk createFolder()");
-      break;
     case "--cat":
       if (DEBUG) console.log(" --cat createFiles()");
+      createFiles();
+      break;
+    case "--mk":
+      if (DEBUG) console.log(" --mk createFolder()");
+      createFolders();
       break;
     case "--help":
     case "--h":
