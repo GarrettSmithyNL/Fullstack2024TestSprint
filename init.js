@@ -6,6 +6,15 @@ const myArgs = process.argv.slice(2);
 
 const folders = ["models", "views", "routes", "logs", "json"];
 
+const configjson = {
+  name: "AppConfigCLI",
+  version: "1.0.0",
+  description: "The Command Line Interface (CLI) for the MyApp.",
+  main: "myapp.js",
+  superuser: "adm1n",
+  database: "exampledb",
+};
+
 function createFolders() {
   if (DEBUG) console.log("init.createFolders()");
   let mkcount = 0;
@@ -36,7 +45,11 @@ function createFiles() {
     if (!fs.existsSync(path.join(__dirname, "./json/config.json"))) {
       fs.writeFile("./json/config.json", configdata, (err) => {
         if (err) {
-          console.log(err);
+          if (err.code == "ENOENT") {
+            console.log("No file or directory");
+          } else {
+            console.log(err);
+          }
         } else {
           console.log("Data written to config file.");
         }
@@ -55,6 +68,8 @@ function initializeApplication() {
   switch (myArgs[1]) {
     case "--all":
       if (DEBUG) console.log(" --all createFolder() and createFiles()");
+      createFolders();
+      createFiles();
       break;
     case "--cat":
       if (DEBUG) console.log(" --cat createFiles()");
